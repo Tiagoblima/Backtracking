@@ -4,73 +4,220 @@ typedef struct
 {	
   int coluna[8];
   int linha[8];
-  int x_a, y_a;
-  int loc[64][8][8];
+  int map[8][8];
   int ataque[8][8];
 }Rainha;
 
 
-int direita(Rainha rainhas[], int* i, int outras,int* linha, int* coluna, int ultima){
+int cima(Rainha rainhas[], int outras,int* linha, int* coluna, int ultima){
 	
 
-	
-	while(linha <= 7 && rainhas[outras].ataque[*coluna][*linha] == 1){
-		rainhas[ultima].loc[*(i++)][*coluna][*linha] = 9;
-		*(linha++);
+	if(*linha > 0){
+		
+		
+		if(rainhas[outras].ataque[*linha-1][*coluna] == 1){
+			
+			return 0;
+			
+		}
+		(*linha)--;	
+		return 1;
 	}
 	
+
+	return 0;
 	
-	if(*linha > 7){
-		return 0;
+}
+int baixo(Rainha rainhas[], int outras,int* linha, int* coluna, int ultima){
+	
+
+	if(*linha < 7){
+		
+		// Se a próxima linha está sob ataque ele retorna a linha anterior e
+		// devolve 0;
+		if(rainhas[outras].ataque[*linha+1][*coluna] == 1){
+			(*linha--);
+			return 0;
+			
+		}
+		(*linha)++;
+		return 1;
 	}
-	return 1;
+	
+
+	return 0;
+	
+}
+
+int esquerda(Rainha rainhas[], int outras,int* linha, int* coluna, int ultima){
+	
+
+	if(*coluna > 0){
+		
+		
+		if(rainhas[outras].ataque[*linha][*coluna-1] == 1){
+			
+			return 0;	
+			
+		}
+		(*coluna)--;	
+		return 1;
+	}
+	
+
+	return 0;
+	
+}
+
+int direita(Rainha rainhas[], int outras,int* linha, int* coluna, int ultima){
+	
+
+	if(*coluna < 7){
+		
+		
+		if(rainhas[outras].ataque[*linha][*coluna+1] == 1){
+		
+			return 0;		
+		}
+		(*coluna)++;	
+		return 1;
+	}
+	
+
+	return 0;
 	
 }
 //Recebe os array de linhas, colunas e diagonais sob ataque,
 // uma rainha e a ultima posicao dos arrays que esta preenchida
 //Devolve 0 se a rainha esta sob ataque e 1 se estiver segura 
-int backtracking(Rainha rainhas[8], int ultima)
+int backtracking(Rainha rainhas[8], int ultima, int tabuleiro[][8])
 {
-	int outras = ultima - 1; // verifica se outras rainhas
 	
-    int coluna = rainhas[ultima].coluna[0];
-	int linha = rainhas[ultima].linha[0];
+	printf("\nBacktracking\n\n");
+	int outras = -1; // verifica se outras rainhas
+	time_t seconds;
 	
-	
-	while(outras > 0){
+	srand(time(&seconds));
+    int linha = rainhas[ultima].linha[0];
+	int coluna = rainhas[ultima].coluna[0];
+
+	int l, k;
+	l = 0;
+	k = 0;
+
+	tabuleiro[linha][coluna] = 9;
+	while(outras < ultima){
 		
+	
+		if(coluna == 7){
+			coluna = 0;	
+		} 
+		
+		outras++;
+		printf(" outras: %i ultima: %i\n", outras, ultima);
 		int i,j;
-		i = 0;
-		j = 0;
-		// tentativa a direita
-		direita(rainha, )
 		
-		// tentativa a esquerda
-		while(rainhas[outras].ataque[k][l] == 1){
-			
-			rainhas[ultima].linha[++i] = --l;
-			
-			if(l == 0){
-				i = 0;
-				l = rainhas[ultima].linha[i];
-			}
-		}
 		
 		
 		for(i = 0; i < 8; i++)
 		  {
 		    for(j = 0; j < 8; j++)
 		    {
-		      printf("%i ",rainhas[ultima].ataque[linha][coluna]);
+		    	if(tabuleiro[i][j] == 9)
+		    		printf("%i ",tabuleiro[i][j]);
+		      	else{
+		      		printf("%i ", rainhas[outras].ataque[i][j]);
+				}	
 		    }
 		    puts("");
 		  }
+		
+		printf("linha: %i: coluna: %i\n", linha, coluna);
 	
+		// tentativa a direita
+	
+		// Se estiver em uma posição atacada tente...
+		
+	
+		
+		if(rainhas[outras].ataque[linha][coluna] == 1){
+				
+				for(i = 0; i < 8; i++)
+				  {
+				    for(j = 0; j < 8; j++)
+				    {
+				      tabuleiro[i][j] = 0;
+				    }
+				  }
+	 	   
+	 	   if(baixo(rainhas, outras, &linha, &coluna, ultima)){
+	 	   	
+	 	   	
+	 	   		rainhas[ultima].map[linha][coluna] = 1;
+				rainhas[ultima].linha[k++] = linha-1;
+				tabuleiro[linha][coluna] = 9;
+				outras = -1;
+				
+			}else if(direita(rainhas, outras, &linha, &coluna, ultima)){
+		
+		
+				rainhas[ultima].map[linha][coluna] = 1;
+				rainhas[ultima].coluna[l++] = coluna-1;
+				tabuleiro[linha][coluna] = 9;
+				outras = -1;
+			
+			}else if(cima(rainhas, outras, &linha, &coluna, ultima)){
+		
+				rainhas[ultima].map[linha][coluna] = 1;
+				rainhas[ultima].linha[k++] = linha+1;
+				tabuleiro[linha][coluna] = 9;
+				outras = -1;
+				
+			}else{
+				
+				if(linha < 7)
+					linha++;	
+				else
+					linha = 0;
+				
+					
+				if(coluna < 7)		
+					coluna++;
+				else{
+					coluna = 0;
+				}
+				
+				printf("k: %i\n", k);
+			
+				
+				
+				tabuleiro[linha][coluna] = 9;
+				 
+				 outras = -1;
+				 printf("Sem saida!\n");	
+			}
+			
+				
+		}
+		if(k == 7){
+			k = 0;
+		}
+		if(l == 7){
+			l = 0;
+		}
+		// tentativa a esquerda
+		
+	 
+	
+		//system("pause");
+		system("cls");
+		
 		
 	}	
 	
-	
- 
+	rainhas[ultima].coluna[0] = coluna;
+	rainhas[ultima].linha[0] = linha;
+ 	
   return 1;
 }
 
@@ -81,6 +228,8 @@ void inicializa(Rainha rainhas[], int tabuleiro[8][8]){
 }
 int main()
 {
+	
+	
   puts("As oito rainhas");
 
   //Inicialização do tabuleiro
@@ -92,13 +241,14 @@ int main()
   //e array com linhas, colunas e diagonais sob ataque
   Rainha rainhas[8];
   
-  
+    int tabuleiro1[8][8]; // mostra as rainhas
   int i, j;
   for(i = 0; i < 8; i++)
   {
     for(j = 0; j < 8; j++)
     {
       tabuleiro[i][j] = 0;
+      tabuleiro1[i][j] = ' ';
     }
   }
   
@@ -112,55 +262,57 @@ int main()
       		rainhas[i].ataque[j][k] = 0;
       		rainhas[i].linha[k] = 0;
       		rainhas[i].coluna[k] = 0;
+      		rainhas[i].map[j][k] = 0;
   		}
     }
-  }
-/*
-for(i = 0; i < 8; i++)
-  {
-    for(j = 0; j < 8; j++)
-    {
-    	for(k = 0; k < 8; k++)
-    	{
-      		printf("%i", rainhas[i].ataque[j][k]);
-  		}
-  		printf("\n");
-    }
-    printf("\n");
   }
 
-  */
 
   //Variáveis auxiliares
   int ultima = 0; //ultima rainha inserida
-  int final = 1;
+  int final = 0  ;
   int col = 0;
   
+  int linha = 0;
+  int coluna = 0;
+
   srand(time(NULL));
-while(final)
+while(final <= 7)
   {
-  	
- 	int l = rand()%8;
- 	int k = rand()%8;
+  	printf("final: %i\n", final);
+ 
  	
- 	
-    rainhas[ultima].linha[0] = l;
-    rainhas[ultima].coluna[0] = k;
+ 	if(ultima > 0){
+ 		rainhas[ultima].linha[0] = rainhas[ultima-1].linha[0];
+ 		rainhas[ultima].coluna[0] = rainhas[ultima-1].coluna[0];
+	 }else{
+	 	rainhas[ultima].linha[0] = 0;
+    	rainhas[ultima].coluna[0] = 0;
+	 }
     
-	int verif = verifica(rainhas, ultima); 	
-	
-	
+    
+
+    
+	backtracking(rainhas, ultima, tabuleiro); 	
 	
 
-	printf("rainhas[ultima].linha[0]: %i\n", rainhas[ultima].linha[0]);
-	printf("rainhas[ultima].coluna[0]: %i\n",  rainhas[ultima].coluna[0]);
+	
+
+//	printf("rainhas[ultima].linha[0]: %i\n", rainhas[ultima].linha[0]);
+//	printf("rainhas[ultima].coluna[0]: %i\n",  rainhas[ultima].coluna[0]);
     //Atualizando os arrays linhas e colunas sob ataque
     
 	int m,n,i,j;
 	
+	 
 	
 	m = rainhas[ultima].linha[0];
 	n = rainhas[ultima].coluna[0];
+	
+	tabuleiro1[m][n] = ultima;
+	
+	
+	
 	
 	rainhas[ultima].ataque[m][n] = 1;
 
@@ -234,104 +386,40 @@ while(final)
 	}
 	
 	
-	
+	 
 	for(i = 0; i < 8; i++)
 	  {
 	    for(j = 0; j < 8; j++)
 	    {
-	      printf("%i ",rainhas[ultima].ataque[i][j]);
+	      tabuleiro[i][j] = 0;
 	    }
-	    puts("");
 	  }
-	
-	final = 0;
 
-     
-    
-/*
-    //Se a posicao atual da rainha estiver sob ataque e 
-    //a rainha atual não tiver atingido a última coluna do tabuleiro
-    //Andar uma casa a direita
-    if((verif == 0) && (rainhas[ultima].coluna < 8))
-    {
-      tabuleiro[rainhas[ultima].linha][rainhas[ultima].coluna] = 0;
-      rainhas[ultima].coluna++;
-
-      col = rainhas[ultima].coluna;
-    }
-	
-    //Se a rainha estiver sob ataque e estiver na ultima coluna
-    //Apaga a rainha atual e faz a rainha anterior andar uma casa a direita
-    if((verif == 0) && (rainhas[ultima].coluna >= 8))
-    {
-      rainhas[ultima].linha = 0;
-      rainhas[ultima].coluna = 0;
-
-      linhas[ultima] = 0;
-      colunas[ultima] = 0;
-      
-      diagPric[ultima] = 0;
-      diagSec[ultima] = 0;
-      
-      ultima--;
-
-      rainhas[ultima].coluna++;
-    }
-	
-	//Colocando '1' nas posições ocupadas pela rainha
-	int a = rainhas[ultima].linha;
-	int b = rainhas[ultima].coluna;
-    tabuleiro[a][b] = 1;
-	
-    //Se for a ultima rainha e ela estiver segura
-    //Fim do while
-    if((verif == 1) && (ultima == 7))
-    {
-      final = 8;
-    }
-	
-    //Se a rainha estiver segura mas não for a ultima
-    //Insere uma nova rainha
-    if((verif == 1) && (ultima < 8))
-    {
-      ultima++;
-    }
-    
-    
-
-	
+	  
 	 for(i = 0; i < 8; i++)
 	  {
 	    for(j = 0; j < 8; j++)
 	    {
-	      printf("%i ",tabuleiro[i][j]);
+	    	if(tabuleiro1[i][j] == 32){
+	    		printf("  ");
+			}else{
+				 printf("%i ", tabuleiro1[i][j]);
+			}
+	      
 	    }
-	    puts("");
+	    printf("\n");
 	  }
-    //Condição de parada do while
-    if(final == 8) break;
-	
-	ultima++;
-	printf("ultima: %i\n", ultima);
-  	printf("final: %i\n", ultima);
-  	printf("verif: %i\n", verif);
 	system("pause");
 	system("cls");
-  }
+	ultima++;
+	
 
-  
 
+	
+	final++;
 
-  //Impressão do tabuleiro
-  puts("\n");
-  for(i = 0; i < 8; i++)
-  {
-    for(j = 0; j < 8; j++)
-    {
-      printf("%i ",tabuleiro[i][j]);
-    }
-    puts("");*/
-  }
+    
+}
 
 
   
