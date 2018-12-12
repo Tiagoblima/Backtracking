@@ -6,8 +6,8 @@
 typedef struct{
 	
 	int x_a,y_a;
-	char c;
 }Path;
+//// Leitura do labirinto
 void lerTamLab(int* n){
 	
 	FILE* file = fopen("labirinto.txt","r"); 
@@ -45,30 +45,28 @@ void lerArquivo(int** lab,int* x,int* y,int* x1,int* y1,int n){
 	
 
 }
-int qtd = 0;
-void report(int v[],int p){
+//////////////////////////////////////////
 
-	v[qtd] = p;	
-	qtd++;
-}
-///Feito em sala
 
+// Navegação 
+// Mover-se para cima
 int moveUp(int** lab, int x,int* y){
 			
-
+	//Se não estou na borda
 	if(*y>0){
-		if(lab[*y-1][x]==0 || lab[*y-1][x]==88){
+		//Se é um obstaculo ou a posição já foi visitada
+		//sinalize como um caminho a não ser seguido 
+		//devolvendo zero 
+		if(lab[*y-1][x]==0 || lab[*y-1][x]==42){
 		
-			return 0;
-		}else if(lab[*y-1][x]==42){
 			return 0;
 		}
-		
+		// Se a posição é um "candidato" visite-o
 		(*y)--;
 	
 		return 1;
 	}
-	
+	//Se já é a borda devolda zero
 	return 0;
 		
 }
@@ -76,10 +74,8 @@ int moveRight(int** lab, int* x,int y,int n){
 	
 	if(*x<n-1){
 		
-		if(lab[y][*x+1]==0 || lab[y][*x+1]==88){
+		if(lab[y][*x+1]==0 || lab[y][*x+1]==42){
 		
-			return 0;
-		}else if(lab[y][*x+1]==42){
 			return 0;
 		}
 		(*x)++;
@@ -92,10 +88,8 @@ int moveDown(int** lab, int x,int* y,int n){
 	
 	if(*y<n-1){
 		
-		if(lab[*y+1][x]==0 || lab[*y+1][x]==88){
+		if(lab[*y+1][x]==0 || lab[*y+1][x]==42){
 		
-			return 0;
-		}else if(lab[*y+1][x]==42){
 			return 0;
 		}
 		(*y)++;
@@ -107,10 +101,8 @@ int moveLeft(int** lab, int* x,int y){
 	
 	if(*x>0){
 		
-		if(lab[y][*x-1]==0 || lab[y][*x-1]==88){
+		if(lab[y][*x-1]==0 || lab[y][*x-1]==42){
 		
-			return 0;
-		}else if(lab[y][*x-1]==42){
 			return 0;
 		}
 		(*x)--;
@@ -128,18 +120,19 @@ void backtracking(int** lab,int x,int y,int x1,int y1,int n){
 
 	int i,j;
 	int game = 1;
-	int w_p = 0;
-	int no_path = 0;
+	int w_p = 0; // Verifica o quanto foi andado 
+	int tentativas = 0;
 	
 	while(game){
 
 		
-		printf("Posição Inicial: %i %i\n",y,x);
+		printf("Posição Atual: %i %i\n",y,x);
 		printf("Saida: %i %i\n",y1,x1);
+		printf("Número de tentativas: %i\n", tentativas);
 		path[w_p].x_a = x;
 		path[w_p].y_a = y;
 	
-		
+		tentativas++;
 		for(i=0;i<n;i++){
 
 			for(j=0;j<n;j++){
@@ -158,46 +151,58 @@ void backtracking(int** lab,int x,int y,int x1,int y1,int n){
 		
 			
 		if(moveUp(lab,x,&y)){
+			
 			path[w_p].x_a = x;
 			path[w_p].y_a = y+1;
 			w_p++;
-			lab[y][x] = 88;
 			
-			no_path = 0;
+			lab[y+1][x] = 42;  // Adiciona * ao caminho já visitado
+			lab[y][x] = 88;
+		
+			
 		}else if(moveRight(lab,&x,y,n)){
+			
 			path[w_p].x_a = x-1;
 			path[w_p].y_a = y;
 			w_p++;
+			
+			
+			lab[y][x-1] = 42; 
 			lab[y][x] = 88;
-			no_path = 0;
+		
+			
 		}else if(moveDown(lab,x,&y,n)){
+			
 			path[w_p].x_a = x;
 			path[w_p].y_a = y-1;
 			w_p++;
+			
+			lab[y-1][x] = 42;
 			lab[y][x] = 88;
-			no_path = 0;
+		
 		}else if(moveLeft(lab,&x,y)){
+			
 			path[w_p].x_a = x+1;
 			path[w_p].y_a = y;
 			w_p++;
+			
+			lab[y][x+1] = 42;			
 			lab[y][x] = 88;
-			no_path = 0;
+	
 		}else{
 		
-			if(w_p>0){
+			if(w_p > 0){
 				w_p--;
 			}
 			x = path[w_p].x_a;
 			y = path[w_p].y_a;
-			no_path++;
+			
+			lab[path[w_p+1].y_a][path[w_p+1].x_a] = 42;
+			
 			lab[y][x] = 88;
 		}
-		if(no_path>=w_p){
-			lab[path[w_p].y_a][path[w_p].x_a] = 42;
-			printf("Não há saida!\n");
-			
-		}
 		
+	
 		if(x==x1 && y==y1){
 			game = 0;
 		}
@@ -207,24 +212,34 @@ void backtracking(int** lab,int x,int y,int x1,int y1,int n){
 	
 	
 	printf("Chegamos à saida!\n");
-	
+	printf("Número de tentativas: %i\n", tentativas);
 	 
-	
+	for(i=0;i<n;i++){
+
+		for(j=0;j<n;j++){
+
+			if(i==y1 && j==x1){
+				printf("S ");
+			}else if(lab[i][j]==0){
+				printf("%i ",lab[i][j]);	
+			}else{
+				printf("%c ",lab[i][j]);
+			}
+				
+		}
+		printf("\n");
+	}
+		
 
 		
 }
 
 void main(){
-
-
-
+       
 
 	int x,y,x1,y1;
-	char pattern[4];
-	
 
-	int i;
-	
+	int i;	
 	int n;
 	
 	lerTamLab(&n);
@@ -236,7 +251,6 @@ void main(){
 	
 	
 	lerArquivo(lab,&x,&y,&x1,&y1,n);
-
 	backtracking(lab,x,y,x1,y1,n);
 	
 	
