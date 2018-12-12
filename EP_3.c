@@ -10,14 +10,14 @@ typedef struct{
 }Path;
 void lerTamLab(int* n){
 	
-	FILE* file = fopen("labirinto.dat","r"); 
+	FILE* file = fopen("labirinto.txt","r"); 
 	fscanf(file,"%i",n);
 	fclose(file);
 }
-void lerArquivo(int** lab,int* x,int* y,int* x1,int* y1,char pattern[],int n){
+void lerArquivo(int** lab,int* x,int* y,int* x1,int* y1,int n){
 	
 	
-	FILE* file = fopen("labirinto.dat","r"); 
+	FILE* file = fopen("labirinto.txt","r"); 
 	
 	fseek(file,1,SEEK_SET);
 	
@@ -40,8 +40,6 @@ void lerArquivo(int** lab,int* x,int* y,int* x1,int* y1,char pattern[],int n){
 		}
 	
 	}
-	fseek(file,sizeof(char)*3,SEEK_CUR);	
-	fgets(pattern,5,file);
 	
 	fclose(file);
 	
@@ -54,62 +52,6 @@ void report(int v[],int p){
 	qtd++;
 }
 ///Feito em sala
-void pm(char t[],int n, char p[], int m){
-	
-	
-	int i,j;
-
-	int v[n-m];
-	for(i=0;i<n-m;i++){
-		
-		j = 0;
-		while(t[i+j]==p[j] && j<m){	
-		
-			j++;
-			
-			if(j==m){
-				report(v,i);
-			}
-			
-		}
-		
-	}
-	
-}
-//feito em sala
-void KMP_preprocess(char* p,int m,int b[]){
-	
-	int i = 0; 
-	int j = -1;
-	
-	b[i] = j;
-	while(i<m){
-		while(j>=0 && p[i] != p[j]){
-			j = b[j];	
-		}
-		i++; j++;
-		b[i] = j;
-	}
-	
-}
-//feito em sala
-
-void KMP(char t[],int n,char p[],int m,int b[]){
-	
-	int i = 0;
-	int j = 0;
-	int v[m];
-	
-	while(i<n){
-		while(j>=0 && t[i] !=p[j])j=b[j];
-		i++; j++;
-		if(j==m){
-			report(v,i-j);
-			j = b[j];
-		}
-	}
-	
-}
 
 int moveUp(int** lab, int x,int* y){
 			
@@ -117,6 +59,8 @@ int moveUp(int** lab, int x,int* y){
 	if(*y>0){
 		if(lab[*y-1][x]==0 || lab[*y-1][x]==88){
 		
+			return 0;
+		}else if(lab[*y-1][x]==42){
 			return 0;
 		}
 		
@@ -135,6 +79,8 @@ int moveRight(int** lab, int* x,int y,int n){
 		if(lab[y][*x+1]==0 || lab[y][*x+1]==88){
 		
 			return 0;
+		}else if(lab[y][*x+1]==42){
+			return 0;
 		}
 		(*x)++;
 		return 1;
@@ -149,6 +95,8 @@ int moveDown(int** lab, int x,int* y,int n){
 		if(lab[*y+1][x]==0 || lab[*y+1][x]==88){
 		
 			return 0;
+		}else if(lab[*y+1][x]==42){
+			return 0;
 		}
 		(*y)++;
 		return 1;
@@ -162,20 +110,16 @@ int moveLeft(int** lab, int* x,int y){
 		if(lab[y][*x-1]==0 || lab[y][*x-1]==88){
 		
 			return 0;
+		}else if(lab[y][*x-1]==42){
+			return 0;
 		}
 		(*x)--;
 		return 1;
 	}
 	return 0;	
 }
-void verificarCaminho(char path[],int n,char pattern[]){
 
-	int b[5];
-	KMP_preprocess(pattern,4,b);
-
-	KMP(path,n,pattern,4,b);
-}
-void backtracking(int** lab,int x,int y,int x1,int y1,char pattern[],int n){
+void backtracking(int** lab,int x,int y,int x1,int y1,int n){
 
 	setlocale(LC_ALL,"");
 	
@@ -189,8 +133,8 @@ void backtracking(int** lab,int x,int y,int x1,int y1,char pattern[],int n){
 	
 	while(game){
 
-		printf("Padrao: %s\n",pattern);
-		printf("J&M: %i %i\n",y,x);
+		
+		printf("Posição Inicial: %i %i\n",y,x);
 		printf("Saida: %i %i\n",y1,x1);
 		path[w_p].x_a = x;
 		path[w_p].y_a = y;
@@ -216,7 +160,6 @@ void backtracking(int** lab,int x,int y,int x1,int y1,char pattern[],int n){
 		if(moveUp(lab,x,&y)){
 			path[w_p].x_a = x;
 			path[w_p].y_a = y+1;
-			path[w_p].c = lab[y][x];
 			w_p++;
 			lab[y][x] = 88;
 			
@@ -224,21 +167,18 @@ void backtracking(int** lab,int x,int y,int x1,int y1,char pattern[],int n){
 		}else if(moveRight(lab,&x,y,n)){
 			path[w_p].x_a = x-1;
 			path[w_p].y_a = y;
-			path[w_p].c = lab[y][x];
 			w_p++;
 			lab[y][x] = 88;
 			no_path = 0;
 		}else if(moveDown(lab,x,&y,n)){
 			path[w_p].x_a = x;
 			path[w_p].y_a = y-1;
-			path[w_p].c = lab[y][x];
 			w_p++;
 			lab[y][x] = 88;
 			no_path = 0;
 		}else if(moveLeft(lab,&x,y)){
 			path[w_p].x_a = x+1;
 			path[w_p].y_a = y;
-			path[w_p].c = lab[y][x];
 			w_p++;
 			lab[y][x] = 88;
 			no_path = 0;
@@ -253,7 +193,7 @@ void backtracking(int** lab,int x,int y,int x1,int y1,char pattern[],int n){
 			lab[y][x] = 88;
 		}
 		if(no_path>=w_p){
-			lab[path[w_p].y_a][path[w_p].x_a] = 0;
+			lab[path[w_p].y_a][path[w_p].x_a] = 42;
 			printf("Não há saida!\n");
 			
 		}
@@ -266,29 +206,12 @@ void backtracking(int** lab,int x,int y,int x1,int y1,char pattern[],int n){
 	}
 	
 	
-	printf("João e Maria chegaram na saida!\n");
+	printf("Chegamos à saida!\n");
 	
 	 
 	
-	char pathC[w_p];
-	
-	for(i=0;i<w_p;i++){
-		
-		pathC[i] = path[i].c;
-	
-	}
 
-	printf("Caminho percorrido: %s",pathC);
-	printf("\nPadrao: %s\n",pattern);
-	//pm("rvrv",p,pattern,4);
-	
-	verificarCaminho(pathC,w_p,pattern);
 		
-	if(qtd){
-		printf("\nEles estão a salvo");
-	}else{
-		printf("\nO dragão os devorou!");
-	}	
 }
 
 void main(){
@@ -312,9 +235,9 @@ void main(){
 	}
 	
 	
-	lerArquivo(lab,&x,&y,&x1,&y1,pattern,n);
+	lerArquivo(lab,&x,&y,&x1,&y1,n);
 
-	backtracking(lab,x,y,x1,y1,pattern,n);
+	backtracking(lab,x,y,x1,y1,n);
 	
 	
 	

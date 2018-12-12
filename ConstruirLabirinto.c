@@ -8,7 +8,7 @@ void construirLabirinto(int** lab,int n){
 
 	int i,j;
 	
-	char colors[] =  {'a', 'v','r','l'};
+	
 	
 	int pattern_p =0;
 	
@@ -27,8 +27,7 @@ void construirLabirinto(int** lab,int n){
 			
 			if(lab[i][j]==1){
 				
-				int color = rand()%4;
-				lab[i][j] = colors[color];	
+				lab[i][j] = ' ';	
 			}
 		
 		}
@@ -67,7 +66,7 @@ void salvarCoordIniciais(int* x,int* y,int* x1,int* y1,int n){
 	
 	
 	//
-	FILE* file = fopen("labirinto.dat","w");
+	FILE* file = fopen("labirinto.txt","w");
 	printf("\nCoordIniciais: \nJ&M: %i %i",*y,*x);	
 	printf("\nSaida: %i %i\n",*y1,*x1);
 	fprintf(file,"%i",n);
@@ -86,42 +85,13 @@ void salvarCoordIniciais(int* x,int* y,int* x1,int* y1,int n){
 
 	fclose(file);
 }
-void gerarPadrao(char pattern[]){
-
-	srand(time(NULL));
-	char colors[] = {'a','v','r','l'};
-	
-	int i;
-	for(i=0;i<4;i++){
-		int color = rand()%4;
-		pattern[i] = colors[color];
-	}
-	 	
-	
-}
-void salvarPadrao(){
-	
 
 
-	FILE* file = fopen("labirinto.dat","a");
-	char pattern[4]; 
-	
-	gerarPadrao(pattern);
-	printf("Padrao: %s\n",pattern);
-	
-	int i;
-	for(i=0;i<5;i++){
-		fprintf(file,"%c",pattern[i]);
-	}
-	
-	fclose(file);
-	
-}
 void salvarLabirinto(int** lab,int n){
 	
 	
 
-	FILE* file = fopen("labirinto.dat","a");
+	FILE* file = fopen("labirinto.txt","a");
 	
 	int i,j;
 	for(i=0;i<n;i++){
@@ -161,7 +131,7 @@ int main(){
 	salvarCoordIniciais(&x,&y,&x1,&y1,n);
 	
 	salvarLabirinto(lab,n);
-	salvarPadrao();
+
 	
 //	system("cls");
 	for(i=0;i<n;i++){
